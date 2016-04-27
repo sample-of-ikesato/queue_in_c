@@ -3,9 +3,9 @@
 
 typedef struct Queue_t {
   unsigned char *head;
-  unsigned char *last;
   unsigned char *buffer;
   int buffer_size;
+  int size;
 } Queue;
 
 // initilize Queue object
@@ -19,7 +19,7 @@ int queue_size(Queue *queue);
 int queue_enqueue(Queue *queue, void *buffer, int size);
 
 // dequeue buffer
-// return buffer (same as argubment's buffer)
-void *queue_dequeue(Queue *queue, void *buffer, int size);
+// return readed buffer size (less than argument size)
+int queue_dequeue(Queue *queue, void *buffer, int size);
 
 #endif//_queue_h_
