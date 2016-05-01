@@ -56,10 +56,11 @@ void test_ring_buffer() {
   assert(memcmp(buffer, "423", 3) == 0);
   assert(queue_enqueue(&q, "5", 1) == -1);
   assert(queue_dequeue(&q, tmp, 3) == 3);
-  assert(memcmp(tmp, "234", 2) == 0);
+  assert(memcmp(tmp, "345", 2) == 0);
+  assert(memcmp(buffer, "453", 3) == 0);
   assert(queue_size(&q) == 0);
   assert(queue_enqueue(&q, "567", 3) == 0);
-  assert(memcmp(buffer, "756", 3) == 0);
+  assert(memcmp(buffer, "675", 3) == 0);
   assert(queue_size(&q) == 3);
   assert(queue_dequeue(&q, tmp, 1) == 1);
   assert(queue_dequeue(&q, tmp, 3) == 2);
@@ -85,7 +86,7 @@ void test_ring_buffer_without_output() {
   assert(queue_dequeue(&q, NULL, 3) == 3);
   assert(queue_size(&q) == 0);
   assert(queue_enqueue(&q, "567", 3) == 0);
-  assert(memcmp(buffer, "756", 3) == 0);
+  assert(memcmp(buffer, "675", 3) == 0);
   assert(queue_size(&q) == 3);
   assert(queue_dequeue(&q, NULL, 1) == 1);
   assert(queue_dequeue(&q, NULL, 3) == 2);
@@ -169,7 +170,7 @@ void test_queue_peek() {
   assert(queue_peek(&q, 0) == '5');
   assert(queue_peek(&q, 1) == '6');
   assert(queue_peek(&q, 2) == '7');
-  assert(memcmp(buffer, "756", 3) == 0);
+  assert(memcmp(buffer, "675", 3) == 0);
   assert(queue_size(&q) == 3);
 }
 
