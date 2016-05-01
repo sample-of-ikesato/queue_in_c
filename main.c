@@ -93,6 +93,86 @@ void test_ring_buffer_without_output() {
 }
 
 
+void test_queue_clear() {
+  Queue q;
+  unsigned char buffer[3];
+  queue_init(&q, buffer, sizeof(buffer));
+  assert(queue_enqueue(&q, "123", 3) == 0);
+  assert(queue_dequeue(&q, NULL, 1) == 1);
+  assert(queue_enqueue(&q, "4", 1) == 0);
+  queue_clear(&q);
+  assert(queue_size(&q) == 0);
+  assert(memcmp(buffer, "423", 3) == 0);
+}
+
+void test_enqueue_from_queue() {
+  Queue q1;
+  Queue q2;
+  unsigned char buffer1[3];
+  unsigned char buffer2[3];
+  queue_init(&q1, buffer1, sizeof(buffer1));
+  queue_init(&q2, buffer2, sizeof(buffer2));
+
+  assert(queue_size(&q1) == 0);
+  assert(queue_enqueue(&q1, "123", 3) == 0);
+  assert(queue_size(&q1) == 3);
+
+  assert(queue_size(&q2) == 0);
+  assert(queue_enqueue_from_queue(&q2, &q1) == 0);
+  assert(queue_size(&q2) == 3);
+  assert(queue_size(&q1) == 3);
+  assert(memcmp(buffer1, "123", 3) == 0);
+  assert(memcmp(buffer2, "123", 3) == 0);
+
+  assert(queue_dequeue(&q2, NULL, 1) == 1);
+  assert(memcmp(buffer2, "123", 3) == 0);
+  assert(queue_size(&q2) == 2);
+  queue_clear(&q1);
+  assert(queue_enqueue(&q1, "4", 1) == 0);
+  assert(queue_size(&q1) == 1);
+  assert(queue_enqueue_from_queue(&q2, &q1) == 0);
+  assert(memcmp(buffer2, "423", 3) == 0);
+  assert(queue_dequeue(&q2, NULL, 3) == 3);
+  assert(queue_size(&q2) == 0);
+  queue_clear(&q1);
+  assert(queue_enqueue(&q1, "567", 3) == 0);
+  assert(queue_enqueue_from_queue(&q2, &q1) == 0);
+  assert(memcmp(buffer2, "756", 3) == 0);
+  assert(queue_size(&q2) == 3);
+  assert(queue_dequeue(&q2, NULL, 1) == 1);
+  assert(queue_dequeue(&q2, NULL, 3) == 2);
+  assert(queue_size(&q2) == 0);
+}
+
+void test_queue_peek() {
+  Queue q;
+  unsigned char buffer[3];
+  queue_init(&q, buffer, sizeof(buffer));
+  assert(queue_size(&q) == 0);
+  assert(queue_enqueue(&q, "123", 3) == 0);
+  assert(queue_size(&q) == 3);
+  assert(queue_peek(&q, 0) == '1');
+  assert(queue_peek(&q, 1) == '2');
+  assert(queue_peek(&q, 2) == '3');
+
+  assert(queue_dequeue(&q, NULL, 1) == 1);
+  assert(queue_size(&q) == 2);
+  assert(queue_enqueue(&q, "4", 1) == 0);
+  assert(queue_peek(&q, 0) == '2');
+  assert(queue_peek(&q, 1) == '3');
+  assert(queue_peek(&q, 2) == '4');
+
+  assert(queue_enqueue(&q, "5", 1) == -1);
+  assert(queue_dequeue(&q, NULL, 3) == 3);
+  assert(queue_size(&q) == 0);
+  assert(queue_enqueue(&q, "567", 3) == 0);
+  assert(queue_peek(&q, 0) == '5');
+  assert(queue_peek(&q, 1) == '6');
+  assert(queue_peek(&q, 2) == '7');
+  assert(memcmp(buffer, "756", 3) == 0);
+  assert(queue_size(&q) == 3);
+}
+
 
 int main(int argc, char **argv)
 {
@@ -100,5 +180,9 @@ int main(int argc, char **argv)
   test_normal_usage();
   test_ring_buffer();
   test_ring_buffer_without_output();
+  test_queue_clear();
+  test_enqueue_from_queue();
+  test_queue_peek();
+  printf("success!\n");
   return 0;
 }

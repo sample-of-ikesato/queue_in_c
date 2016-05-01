@@ -34,6 +34,24 @@ int queue_enqueue(Queue *queue, void *buffer, int size)
   return 0;
 }
 
+int queue_enqueue_from_queue(Queue *queue, Queue *other)
+{
+  Queue *q = queue;
+  unsigned char *qp = q->head + q->size;
+  int i;
+
+  if (q->size + other->size > q->buffer_size)
+    return -1;
+  for (i=0; i<other->size; i++) {
+    if (qp >= q->buffer + q->buffer_size) {
+      qp = q->buffer;
+    }
+    *qp++ = queue_peek(other, i);
+  }
+  q->size += other->size;
+  return 0;
+}
+
 int queue_dequeue(Queue *queue, void *buffer, int size)
 {
   Queue *q = queue;
@@ -60,4 +78,21 @@ int queue_dequeue(Queue *queue, void *buffer, int size)
   }
   q->size -= size;
   return size;
+}
+
+unsigned char queue_peek(Queue *queue, int pos)
+{
+  Queue *q = queue;
+  if (q->head + pos >= q->buffer + q->buffer_size) {
+    return *(q->head + pos - q->buffer_size);
+  } else {
+    return *(q->head + pos);
+  }
+}
+
+// clear queue
+void queue_clear(Queue *queue)
+{
+  Queue *q = queue;
+  q->size = 0;
 }
