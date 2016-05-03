@@ -3,23 +3,21 @@
 
 static void queue_increment_size(Queue *q);
 
-void queue_init(Queue *queue, void *buffer, int max_size)
+void queue_init(Queue *q, void *buffer, int max_size)
 {
-  Queue *q = queue;
   q->buffer = buffer;
   q->buffer_size = max_size;
   q->head = buffer;
   q->size = 0;
 }
 
-int queue_size(Queue *queue)
+int queue_size(Queue *q)
 {
-  return queue->size;
+  return q->size;
 }
 
-int queue_enqueue(Queue *queue, void *buffer, int size)
+int queue_enqueue(Queue *q, void *buffer, int size)
 {
-  Queue *q = queue;
   unsigned char *bp = buffer;
   unsigned char *qp = q->head + q->size;
   int i;
@@ -37,9 +35,8 @@ int queue_enqueue(Queue *queue, void *buffer, int size)
   return ret;
 }
 
-int queue_enqueue_from_queue(Queue *queue, Queue *other)
+int queue_enqueue_from_queue(Queue *q, Queue *other)
 {
-  Queue *q = queue;
   unsigned char *qp = q->head + q->size;
   int i;
   int ret = 0;
@@ -56,9 +53,8 @@ int queue_enqueue_from_queue(Queue *queue, Queue *other)
   return ret;
 }
 
-int queue_dequeue(Queue *queue, void *buffer, int size)
+int queue_dequeue(Queue *q, void *buffer, int size)
 {
-  Queue *q = queue;
   if (buffer != NULL) {
     unsigned char *bp = buffer;
     unsigned char *qp = q->head;
@@ -84,9 +80,8 @@ int queue_dequeue(Queue *queue, void *buffer, int size)
   return size;
 }
 
-unsigned char queue_peek(Queue *queue, int pos)
+unsigned char queue_peek(Queue *q, int pos)
 {
-  Queue *q = queue;
   if (q->head + pos >= q->buffer + q->buffer_size) {
     return *(q->head + pos - q->buffer_size);
   } else {
@@ -95,9 +90,8 @@ unsigned char queue_peek(Queue *queue, int pos)
 }
 
 // clear queue
-void queue_clear(Queue *queue)
+void queue_clear(Queue *q)
 {
-  Queue *q = queue;
   q->size = 0;
 }
 
