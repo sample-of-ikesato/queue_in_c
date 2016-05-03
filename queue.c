@@ -19,7 +19,7 @@ int queue_size(Queue *q)
 int queue_enqueue(Queue *q, void *buffer, int size)
 {
   unsigned char *bp = buffer;
-  unsigned char *qp = q->head + q->size;
+  unsigned char *qp = q->head;
   int i;
   int ret = 0;
 
@@ -32,12 +32,13 @@ int queue_enqueue(Queue *q, void *buffer, int size)
     *qp++ = *bp++;
     queue_increment_size(q);
   }
+  q->head = qp;
   return ret;
 }
 
 int queue_enqueue_from_queue(Queue *q, Queue *other)
 {
-  unsigned char *qp = q->head + q->size;
+  unsigned char *qp = q->head;
   int i;
   int ret = 0;
 
@@ -50,6 +51,7 @@ int queue_enqueue_from_queue(Queue *q, Queue *other)
     *qp++ = queue_peek(other, i);
     queue_increment_size(q);
   }
+  q->head = qp;
   return ret;
 }
 
@@ -57,7 +59,10 @@ int queue_dequeue(Queue *q, void *buffer, int size)
 {
   if (buffer != NULL) {
     unsigned char *bp = buffer;
-    unsigned char *qp = q->head;
+    unsigned char *qp = q->head - q->size;
+    if (qp < q->buffer) {
+      qp += q->buffer_size;
+    }
     int i;
     for (i=0; i<size; i++) {
       if (i == q->size)
@@ -71,22 +76,17 @@ int queue_dequeue(Queue *q, void *buffer, int size)
 
   if (size > q->size)
     size = q->size;
-  if (q->head + size >= q->buffer + q->buffer_size) {
-    q->head = q->head + size - q->buffer_size;
-  } else {
-    q->head += size;
-  }
   q->size -= size;
   return size;
 }
 
 unsigned char queue_peek(Queue *q, int pos)
 {
-  if (q->head + pos >= q->buffer + q->buffer_size) {
-    return *(q->head + pos - q->buffer_size);
-  } else {
-    return *(q->head + pos);
+  unsigned char *qp = q->head - q->size + pos;
+  if (qp < q->buffer) {
+    qp += q->buffer_size;
   }
+  return *qp;
 }
 
 // clear queue
@@ -99,10 +99,5 @@ static void queue_increment_size(Queue *q)
 {
   if (q->size < q->buffer_size) {
     q->size++;
-  } else {
-    q->head++;
-    if (q->head >= q->buffer + q->buffer_size) {
-      q->head = q->buffer;
-    }
   }
 }
