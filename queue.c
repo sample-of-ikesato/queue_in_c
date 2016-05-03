@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "queue.h"
 
-static void queue_increment_size(Queue *q);
 
 void queue_init(Queue *q, void *buffer, int max_size)
 {
@@ -30,8 +29,11 @@ int queue_enqueue(Queue *q, void *buffer, int size)
       qp -= q->buffer_size;
     }
     *qp++ = *bp++;
-    queue_increment_size(q);
   }
+  if (q->size + size > q->buffer_size)
+    q->size = q->buffer_size;
+  else
+    q->size += size;
   q->head = qp;
   return ret;
 }
@@ -49,8 +51,11 @@ int queue_enqueue_from_queue(Queue *q, Queue *other)
       qp -= q->buffer_size;
     }
     *qp++ = queue_peek(other, i);
-    queue_increment_size(q);
   }
+  if (q->size + other->size > q->buffer_size)
+    q->size = q->buffer_size;
+  else
+    q->size += other->size;
   q->head = qp;
   return ret;
 }
@@ -93,11 +98,4 @@ unsigned char queue_peek(Queue *q, int pos)
 void queue_clear(Queue *q)
 {
   q->size = 0;
-}
-
-static void queue_increment_size(Queue *q)
-{
-  if (q->size < q->buffer_size) {
-    q->size++;
-  }
 }
